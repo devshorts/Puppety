@@ -7,9 +7,9 @@ Roles are assigned to remote machines by setting a file in `/etc/.role/role` who
 
 # Requirements
 
-Docker v1.6+
-python
-pip
+- Docker v1.6+
+- python
+- pip
 
 # Testing your puppet scripts
 
