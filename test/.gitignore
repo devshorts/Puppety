@@ -1,0 +1,9 @@
+*.bak
+*.templated
+*.pyc
+master/data
+master/runners
+agent/runners
+agent/data
+results
+__pycache__

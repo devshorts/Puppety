@@ -1,0 +1,41 @@
+#!/bin/bash
+
+case "$1" in
+    --debug)
+        shift
+        exec "$@"
+        exit 0
+        ;;
+esac
+
+
+echo "Starting agent..."
+
+COUNT=5
+
+while [ ${COUNT} > 0 ]; do
+    puppet agent -t --environment=--ENVIRONMENT--
+    if [ $? -eq 0 ]; then
+        break
+    else
+        sleep 2
+    fi
+
+    COUNT=$((${COUNT} - 1))
+done
+
+if [ ${COUNT} -eq 0 ]; then
+    echo "Unable to connect to puppet master"
+
+    exit 1
+fi
+
+echo "TEST BEGIN"
+
+cd /root/test-runners
+
+TEST_RESULT_FILE_NAME=`echo "--RUNNER--" | sed "s#/#-#g"`
+
+py.test --junitxml=/opt/local/${TEST_RESULT_FILE_NAME}-agent.xml -v -k agent --RUNNER--.py
+
+

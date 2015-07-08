@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    --debug)
+        shift
+        exec "$@"
+        exit 0
+        ;;
+esac
+
+
+pushd /root/test-runners
+
+TEST_RESULT_FILE_NAME=`echo "--RUNNER--" | sed "s#/#-#g"`
+
+py.test --junitxml=/opt/local/${TEST_RESULT_FILE_NAME}-master.xml -v -k master --RUNNER--.py
+
+popd
+
+touch /opt/local/sync
+
+/usr/bin/puppet master --verbose --no-daemonize
