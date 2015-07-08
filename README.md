@@ -1,4 +1,4 @@
-Puppet-scripts
+Puppety
 =====
 
 This is a way to test puppet scripts. Currently supported is both role based testing and node based testing.
