@@ -252,7 +252,7 @@ def run_docker_images(config):
     print "Executing master"
 
     master_sha = subprocess.check_output(
-        docker_args("run -d -p 8140:8140 -v %(pwd)s/results/%(environment)s:/opt/local %(master_name)s" % \
+        docker_args("run -d -p 8140:8140 -v %(pwd)s/results/%(environment)s:/opt/local --privileged %(master_name)s" % \
                     {'pwd': pwd,
                      'environment': config.environment,
                      'master_name': master_name})).strip()
@@ -263,7 +263,7 @@ def run_docker_images(config):
 
     print "Executing agent"
 
-    agent_cmd = "run -v %(pwd)s/results/%(environment)s:/opt/local -h %(docker_host)s  %(agent_name)s" % \
+    agent_cmd = "run -v %(pwd)s/results/%(environment)s:/opt/local -h %(docker_host)s --privileged  %(agent_name)s" % \
                 {'pwd': pwd,
                  'environment': config.environment,
                  'docker_host': config.docker_host_name,

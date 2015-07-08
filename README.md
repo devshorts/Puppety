@@ -1,9 +1,15 @@
-Puppety
+Puppet-scripts
 =====
 
 This is a way to test puppet scripts. Currently supported is both role based testing and node based testing.
 
 Roles are assigned to remote machines by setting a file in `/etc/.role/role` whose contents contains the role name.
+
+# Requirements
+
+Docker v1.6+
+python
+pip
 
 # Testing your puppet scripts
 
