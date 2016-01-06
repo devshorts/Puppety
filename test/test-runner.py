@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import os
-import shutil
-import subprocess
 import re
-import time
+import shutil
 import socket
+import subprocess
+import time
 
 
 class Config:
@@ -158,13 +158,15 @@ def template_file(search_str, replace_str, file, flags=TemplateFlags.Normal):
         buffer.truncate()
 
 
-def get_puppet_master_ip():
-    default = socket.gethostname()
+def get_puppet_master_ip(docker_ip):
+    if docker_ip is None:
+        default = socket.gethostname()
 
-    if subprocess.check_output("uname").strip() == "Darwin":
-        return "192.168.59.103"
+        if subprocess.check_output("uname").strip() == "Darwin":
+            return "192.168.99.100"
 
-    return default
+        return default
+    return docker_ip
 
 
 def template(search_str, replace_str, contents, flags=TemplateFlags.Normal):
@@ -252,10 +254,11 @@ def run_docker_images(config):
     print "Executing master"
 
     master_sha = subprocess.check_output(
-        docker_args("run -d -p 8140:8140 -v %(pwd)s/results/%(environment)s:/opt/local --privileged %(master_name)s" % \
-                    {'pwd': pwd,
-                     'environment': config.environment,
-                     'master_name': master_name})).strip()
+            docker_args(
+                "run -d -p 8140:8140 -v %(pwd)s/results/%(environment)s:/opt/local --privileged %(master_name)s" % \
+                {'pwd': pwd,
+                 'environment': config.environment,
+                 'master_name': master_name})).strip()
 
     wait_for_master_to_run(config)
 
@@ -281,7 +284,7 @@ def run_docker_images(config):
 
 
 def template_puppet_master(config):
-    set_dns_alt(get_puppet_master_ip(), config.master_puppet_conf)
+    set_dns_alt(get_puppet_master_ip(config.puppet_master_ip), config.master_puppet_conf)
 
 
 def stop_pending_docker_masters():
@@ -327,6 +330,9 @@ def get_args_parser():
     parser.add_argument('--manifests-dir', dest='manifests_dir',
                         help='The manifests directory to scan relative to the /data folder.'
                              ' default: environments/{environment}')
+
+    parser.add_argument('--docker-ip', dest='docker_ip', default=get_puppet_master_ip(None),
+                        help='The ip docker lives on. For raw metal like linux this defaults to the hostname. For docker-machine pass in your ip')
 
     parser.add_argument('-t', dest='test_name',
                         help='The test to run')
@@ -379,11 +385,11 @@ if __name__ == '__main__':
         else "master/data/environments/" + args.environment + "/manifests"
 
     config = Config(
-        puppet_master_ip=get_puppet_master_ip(),
-        manifests_dir=manifests_dir,
-        environment=args.environment,
-        docker_tag=args.docker_tag,
-        master_puppet_conf="master/data/" + args.master_puppet_conf
+            puppet_master_ip=get_puppet_master_ip(args.docker_ip),
+            manifests_dir=manifests_dir,
+            environment=args.environment,
+            docker_tag=args.docker_tag,
+            master_puppet_conf="master/data/" + args.master_puppet_conf
     )
 
     fixture_setup()
